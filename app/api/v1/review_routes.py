@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session
 from typing import List
 
-from app.schemas.review import ReviewView, ReviewCreate
+from app.schemas.review import ReviewView, ReviewCreate, ReviewFilterResponse
 from app.db.session import get_session
 from app.services.review_service import *
+from app.services.filter_service import filter_review
 router = APIRouter()
 
 @router.post("/",response_model= ReviewView)
@@ -21,3 +22,8 @@ def get_by_id(review_id:int,session:Session = Depends(get_session)):
     if not review:
         raise HTTPException(status_code=404,detail="Review Not found")
     return review
+
+@router.post("/filter",response_model=List[ReviewView])
+def filter_endpoint(payload:ReviewFilterResponse, session: Session = Depends(get_session)):
+    return filter_review(session,payload)
+
